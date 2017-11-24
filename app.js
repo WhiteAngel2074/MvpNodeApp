@@ -11,13 +11,19 @@ const request = require('request');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
+var emails = require('./routes/emails');
 
 const expressHbs = require('express-handlebars');
+//
+//
 
 var app = express();
 
 // view engine setup
-app.engine('.hbs', expressHbs({defaultLayout: 'layout', extname:'.hbs'}));
+app.engine('.hbs', expressHbs({
+  defaultLayout: 'layout',
+  extname: '.hbs'
+}));
 app.set('view engine', 'hbs');
 
 app.set('views', path.join(__dirname, 'views'));
@@ -27,7 +33,9 @@ app.set('views', path.join(__dirname, 'views'));
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -36,12 +44,38 @@ app.use(morgan('dev'));
 
 // View Engine
 //app.engine()
-app.get('/', (req,res, next)=>{
-  res.render('main/home');
-});
+app.route('/')
+  .get((req, res, next) => {
+    res.render('main/home');
+  })
+  .post((req, res, next) => {
+    //capture users mail
+    request({
+      url:'https://us15.api.mailchimp.com/3.0/lists/60797ca10e/members',
+      method:'POST',
+      headers:{
+        'Authorization':'randomUser 2896b6faa1eb43e3925016e192ee76a8-us15',
+        'Content-Type':'application/json'
+      },
+      json:{
+        'email_address':req.body.email,
+        'status':'subscribed',
+      }
+
+    }, function(err,response,body) {
+      if (err) {
+        console.log(err);
+      }else {
+        console.log('Bien envoyé');
+        res.redirect('/');
+      }
+
+    });
+  });
 
 app.use('/', index);
 app.use('/users', users);
+app.use('/emails', emails)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
