@@ -12,11 +12,16 @@ const request = require('request');
 var index = require('./routes/index');
 var users = require('./routes/users');
 
+const expressHbs = require('express-handlebars');
+
 var app = express();
 
 // view engine setup
+app.engine('.hbs', expressHbs({defaultLayout: 'layout', extname:'.hbs'}));
+app.set('view engine', 'hbs');
+
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+// app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -29,8 +34,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 //morgan
 app.use(morgan('dev'));
 
+// View Engine
+//app.engine()
 app.get('/', (req,res, next)=>{
-  res.json('Hello Hamdi');
+  res.render('main/home');
 });
 
 app.use('/', index);
